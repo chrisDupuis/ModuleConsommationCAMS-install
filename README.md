@@ -11,8 +11,8 @@ installer.
 | Fichier | Radio | Correction du courant |
 |---|---|---|
 | `CapacitySensor_Flysky100.bin` | FlySky (iBus) | aucune |
-| `CapacitySensor_Futaba100.bin` | Futaba / FrSky (SBUS2) | aucune |
-| `CapacitySensor_Futaba118.bin` | Futaba / FrSky (SBUS2) | ×1,18 |
+| `CapacitySensor_Futaba100.bin` | Futaba (SBUS2) | aucune |
+| `CapacitySensor_Futaba118.bin` | Futaba (SBUS2) | ×1,18 |
 
 Chaque fichier est une image complète, à flasher à l'adresse `0x0`.
 
