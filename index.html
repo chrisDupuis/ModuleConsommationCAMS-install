@@ -5,97 +5,172 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Installer le capteur de capacité</title>
 <style>
-  :root { --bg: #f6f7f9; --card: #fff; --text: #1a1c1f; --muted: #5b626b; --line: #d9dde2; --accent: #0b63ce; --ok: #1c7a34; --bad: #c0392b; --okbg: #e6f5ea; --badbg: #fdecea; --term: #111417; --termtext: #d7e0d7; }
+  :root {
+    --bg: #eef1f5; --card: #ffffff; --text: #16191d; --muted: #5d6672; --line: #dfe3e9; --soft: #f4f6f9;
+    --accent: #1f5fd1; --accent-hover: #184caa; --accent-soft: #e8f0fd;
+    --ok: #1a7a37; --okbg: #e5f5ea; --bad: #b93221; --badbg: #fdebe8;
+    --term: #0f1317; --termtext: #cfe3d2; --termline: #232a31;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 4px 16px rgba(16,24,40,.06);
+  }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #15171a; --card: #1f2226; --text: #eceef0; --muted: #a3abb5; --line: #353a41; --accent: #6aa9ff; --ok: #6fd088; --bad: #ff8a7a; --okbg: #17301e; --badbg: #3a1b17; --term: #0b0d0f; }
+    :root {
+      --bg: #101215; --card: #1a1d21; --text: #eceef1; --muted: #9da6b2; --line: #2d3238; --soft: #22262b;
+      --accent: #4d8df5; --accent-hover: #6ea3f8; --accent-soft: #1b2a45;
+      --ok: #6fd58a; --okbg: #15301d; --bad: #ff9080; --badbg: #3a1a16;
+      --term: #090b0d; --termline: #1c2228;
+      --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
-  h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 20px; }
-  .step { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
-  .step.locked { opacity: .55; }
-  .step h2 { font-size: 1.15rem; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
-  .num { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: .95rem; display: inline-flex; align-items: center; justify-content: center; }
-  .step.done .num { background: var(--ok); }
-  ol, ul { margin: 6px 0 12px; padding-left: 22px; }
-  li { margin: 3px 0; }
-  kbd { font: inherit; font-weight: 700; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; background: var(--bg); }
-  button { padding: 10px 16px; font: inherit; font-weight: 600; color: #fff; background: #0b63ce; border: 0; border-radius: 6px; cursor: pointer; }
-  button:hover:not(:disabled) { background: #094fa5; }
-  button:disabled { background: #8a929c; cursor: not-allowed; }
-  button.second { background: transparent; color: var(--text); border: 1px solid var(--line); }
-  button.second:hover:not(:disabled) { background: var(--bg); }
-  button.second:disabled { opacity: .45; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15.5px/1.5 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  main { max-width: 1180px; margin: 0 auto; padding: 36px 20px 56px; }
+
+  header { margin-bottom: 24px; }
+  h1 { font-size: 1.75rem; line-height: 1.2; letter-spacing: -.015em; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0; }
+
+  .grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .wide { grid-column: 1 / -1; } }
+
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-width: 0; transition: opacity .2s; }
+  .step.locked { opacity: .5; }
+  .step.locked .body { pointer-events: none; }
+  .step h2 { font-size: 1.12rem; margin: 0 0 14px; display: flex; align-items: center; gap: 12px; letter-spacing: -.005em; }
+  .num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; font-size: .95rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .step.done .num { background: var(--ok); font-size: 0; }
+  .step.done .num::before { content: "\2713"; font-size: 1rem; }
+  .body { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .grow { flex: 1; }
+
+  ol { margin: 0 0 18px; padding-left: 20px; }
+  li { margin: 6px 0; padding-left: 4px; }
+  li::marker { color: var(--muted); font-weight: 600; }
+  kbd { font: inherit; font-size: .9em; font-weight: 700; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 7px; background: var(--soft); white-space: nowrap; }
+
+  button { padding: 10px 18px; font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 1px solid transparent; border-radius: 8px; cursor: pointer; transition: background .15s, border-color .15s; }
+  button:hover:not(:disabled) { background: var(--accent-hover); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+  button:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+  button.second { background: var(--card); color: var(--text); border-color: var(--line); }
+  button.second:hover:not(:disabled) { background: var(--soft); }
+  button.second:disabled { background: var(--card); opacity: .45; }
+  @media (prefers-color-scheme: dark) { button:not(.second):not(:disabled) { color: #0b1220; } }
   .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .status { margin-top: 12px; padding: 9px 12px; border-radius: 6px; font-weight: 600; display: none; }
+
+  .status { margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-weight: 600; font-size: .95rem; display: none; }
   .status.ok { display: block; background: var(--okbg); color: var(--ok); }
   .status.bad { display: block; background: var(--badbg); color: var(--bad); }
-  .status.info { display: block; background: var(--bg); color: var(--muted); }
-  .choices { display: grid; gap: 8px; margin: 8px 0 12px; }
-  .choices label { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
-  .choices input { margin-top: 5px; }
-  .choices small { display: block; color: var(--muted); }
-  .opt { display: block; color: var(--muted); font-size: .92rem; margin-bottom: 12px; }
-  progress { width: 100%; height: 14px; margin-top: 12px; display: none; }
-  pre { background: var(--term); color: var(--termtext); font: 12.5px/1.45 Menlo, Consolas, monospace; padding: 10px 12px; border-radius: 6px; margin: 12px 0 0; height: 260px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
-  details { margin-top: 12px; color: var(--muted); font-size: .92rem; }
-  details pre { height: 180px; }
-  #logs { position: relative; left: 50%; transform: translateX(-50%); width: min(1280px, calc(100vw - 32px)); height: 420px; white-space: pre; word-break: normal; }
-  .note { color: var(--muted); font-size: .92rem; margin: 8px 0 0; }
-  #unsupported { display: none; }
+  .status.info { display: block; background: var(--soft); color: var(--muted); }
+  #unsupported { display: none; margin: 0 0 18px; }
+
+  .choices { display: grid; gap: 8px; margin: 0 0 14px; }
+  .choices label { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .choices label:hover { border-color: var(--accent); }
+  .choices label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .choices input { accent-color: var(--accent); width: 17px; height: 17px; margin: 0; flex: none; }
+  .choices b { display: block; line-height: 1.3; }
+  .choices small { display: block; color: var(--muted); font-size: .86rem; }
+  .opt { display: flex; gap: 9px; align-items: flex-start; color: var(--muted); font-size: .88rem; margin-bottom: 18px; cursor: pointer; }
+  .opt input { accent-color: var(--accent); margin-top: 4px; flex: none; }
+  progress { width: 100%; height: 8px; margin-top: 14px; display: none; border: 0; border-radius: 99px; overflow: hidden; background: var(--soft); accent-color: var(--accent); }
+  progress::-webkit-progress-bar { background: var(--soft); }
+  progress::-webkit-progress-value { background: var(--accent); border-radius: 99px; }
+
+  .s3head { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  @media (min-width: 900px) { .s3head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; } }
+  .tiles { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
+  .tile { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+  .tile .lbl { display: block; color: var(--muted); font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .tile .val { display: block; font-size: clamp(1.05rem, 4.2vw, 1.45rem); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .unit { font-size: .9rem; font-weight: 600; color: var(--muted); margin-left: 3px; }
+  .tilenote { color: var(--muted); font-size: .86rem; margin: 10px 0 0; }
+
+  .console { margin-top: 18px; border-radius: 10px; overflow: hidden; background: var(--term); border: 1px solid var(--termline); }
+  .console .bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 12px; border-bottom: 1px solid var(--termline); color: #8b96a3; font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4a535d; margin-right: 8px; vertical-align: 1px; }
+  .console.live .dot { background: #3ddc6a; box-shadow: 0 0 0 3px rgba(61,220,106,.18); }
+  pre { margin: 0; background: var(--term); color: var(--termtext); font: 12.5px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; padding: 12px 14px; overflow: auto; }
+  #logs { height: 400px; white-space: pre; font-size: 11.5px; }
+  #term { height: 200px; white-space: pre-wrap; word-break: break-word; border-radius: 10px; margin-top: 12px; }
+  .note { color: var(--muted); font-size: .88rem; margin: 12px 0 0; }
+  details { margin-top: 20px; color: var(--muted); font-size: .9rem; }
+  summary { cursor: pointer; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Installer le capteur de capacité</h1>
-  <p class="sub">LOLIN S2 Mini (ESP32-S2) &middot; Chrome ou Edge sur ordinateur, Windows ou macOS</p>
+  <header>
+    <h1>Installer le capteur de capacité</h1>
+    <p class="sub">LOLIN S2 Mini (ESP32-S2) &middot; Chrome ou Edge sur ordinateur, Windows ou macOS</p>
+  </header>
 
   <div id="unsupported" class="status bad">Ce navigateur ne permet pas d'accéder au port USB. Ouvrir cette page avec Chrome ou Edge sur un ordinateur.</div>
 
-  <section class="step" id="s1">
-    <h2><span class="num">1</span>Mode programmation et choix du port</h2>
-    <ol>
-      <li>Brancher la carte au PC avec un câble USB (câble de données).</li>
-      <li>Passer en mode programmation : maintenir <kbd>0</kbd>, appuyer brièvement sur <kbd>RST</kbd>, relâcher <kbd>0</kbd>.</li>
-      <li>Cliquer sur le bouton ci-dessous et choisir le port de la carte (nom contenant « ESP32-S2 », ou un port COM sous Windows).</li>
-    </ol>
-    <div class="row">
-      <button id="btnConnect">Choisir le port et vérifier</button>
-      <button id="btnDisconnect" class="second" disabled>Déconnecter</button>
-    </div>
-    <div id="st1" class="status"></div>
-  </section>
+  <div class="grid">
+    <section class="step" id="s1">
+      <h2><span class="num">1</span>Mode programmation et choix du port</h2>
+      <div class="body">
+        <ol class="grow">
+          <li>Brancher la carte au PC avec un câble USB (câble de données).</li>
+          <li>Passer en mode programmation : maintenir <kbd>0</kbd>, appuyer brièvement sur <kbd>RST</kbd>, relâcher <kbd>0</kbd>.</li>
+          <li>Cliquer sur le bouton ci-dessous et choisir le port de la carte (nom contenant « ESP32-S2 », ou un port COM sous Windows).</li>
+        </ol>
+        <div class="row">
+          <button id="btnConnect">Choisir le port et vérifier</button>
+          <button id="btnDisconnect" class="second" disabled>Déconnecter</button>
+        </div>
+        <div id="st1" class="status"></div>
+      </div>
+    </section>
 
-  <section class="step locked" id="s2">
-    <h2><span class="num">2</span>Envoi du programme</h2>
-    <div class="choices">
-      <label><input type="radio" name="fw" value="CapacitySensor_Flysky100.bin"><span><b>FlySky</b><small>Télémétrie iBus, courant sans correction</small></span></label>
-      <label><input type="radio" name="fw" value="CapacitySensor_Futaba100.bin"><span><b>Futaba / FrSky 100 %</b><small>Télémétrie SBUS2, courant sans correction</small></span></label>
-      <label><input type="radio" name="fw" value="CapacitySensor_Futaba118.bin"><span><b>Futaba / FrSky 118 %</b><small>Télémétrie SBUS2, courant corrigé &times;1,18</small></span></label>
-    </div>
-    <label class="opt"><input type="checkbox" id="eraseAll"> Effacer toute la mémoire avant l'envoi (à cocher seulement si la carte ne démarre pas après une première installation)</label>
-    <button id="btnFlash" disabled>Envoyer le programme</button>
-    <progress id="prog" max="100" value="0"></progress>
-    <div id="st2" class="status"></div>
-  </section>
+    <section class="step locked" id="s2">
+      <h2><span class="num">2</span>Envoi du programme</h2>
+      <div class="body">
+        <div class="choices">
+          <label><input type="radio" name="fw" value="CapacitySensor_Flysky100.bin"><span><b>FlySky</b><small>Télémétrie iBus, courant sans correction</small></span></label>
+          <label><input type="radio" name="fw" value="CapacitySensor_Futaba100.bin"><span><b>Futaba / FrSky 100 %</b><small>Télémétrie SBUS2, courant sans correction</small></span></label>
+          <label><input type="radio" name="fw" value="CapacitySensor_Futaba118.bin"><span><b>Futaba / FrSky 118 %</b><small>Télémétrie SBUS2, courant corrigé &times;1,18</small></span></label>
+        </div>
+        <label class="opt grow"><input type="checkbox" id="eraseAll"><span>Effacer toute la mémoire avant l'envoi. À cocher seulement si la carte ne démarre pas après une première installation.</span></label>
+        <div class="row"><button id="btnFlash" disabled>Envoyer le programme</button></div>
+        <progress id="prog" max="100" value="0"></progress>
+        <div id="st2" class="status"></div>
+      </div>
+    </section>
 
-  <section class="step" id="s3">
-    <h2><span class="num">3</span>Redémarrage et lecture des logs</h2>
-    <ol>
-      <li>Appuyer sur <kbd>RST</kbd> pour redémarrer la carte en mode normal.</li>
-      <li>Attendre 3 secondes, cliquer sur le bouton ci-dessous et choisir le port de la carte. Ce n'est pas le même port qu'à l'étape 1 : la carte change de port en quittant le mode programmation.</li>
-    </ol>
-    <div class="row">
-      <button id="btnLogs">Lire les logs</button>
-      <button id="btnStopLogs" class="second" disabled>Arrêter</button>
-      <button id="btnClearLogs" class="second">Effacer</button>
-    </div>
-    <div id="st3" class="status"></div>
-    <pre id="logs" aria-label="Logs de la carte"></pre>
-    <p class="note">En fonctionnement normal, la carte affiche en continu le courant, la tension et la capacité mesurés. Seules les 500 dernières lignes sont conservées, et l'affichage ne défile plus tout seul si on remonte dans les logs. Pour revoir les messages de démarrage, appuyer à nouveau sur <kbd>RST</kbd> puis relancer la lecture.</p>
-  </section>
+    <section class="step wide" id="s3">
+      <h2><span class="num">3</span>Redémarrage et lecture des logs</h2>
+      <div class="body">
+        <div class="s3head">
+          <div>
+            <ol>
+              <li>Appuyer sur <kbd>RST</kbd> pour redémarrer la carte en mode normal.</li>
+              <li>Attendre 3 secondes, cliquer sur « Lire les logs » et choisir le port de la carte. Ce n'est pas le même port qu'à l'étape 1 : la carte change de port en quittant le mode programmation.</li>
+            </ol>
+            <div class="row">
+              <button id="btnLogs">Lire les logs</button>
+              <button id="btnStopLogs" class="second" disabled>Arrêter</button>
+              <button id="btnClearLogs" class="second">Effacer</button>
+            </div>
+          </div>
+          <div>
+            <div class="tiles">
+              <div class="tile"><span class="lbl">Courant</span><span class="val"><span id="vCur">–</span><span class="unit" id="uCur">mA</span></span></div>
+              <div class="tile"><span class="lbl">Tension</span><span class="val"><span id="vVolt">–</span><span class="unit">V</span></span></div>
+              <div class="tile"><span class="lbl">Capacité</span><span class="val"><span id="vCap">–</span><span class="unit">mAh</span></span></div>
+            </div>
+            <p class="tilenote">Dernières valeurs mesurées par la carte, lues dans les logs.</p>
+          </div>
+        </div>
+        <div id="st3" class="status"></div>
+        <div class="console" id="console">
+          <div class="bar"><span><span class="dot"></span>Logs de la carte</span><span id="logCount"></span></div>
+          <pre id="logs" aria-label="Logs de la carte"></pre>
+        </div>
+        <p class="note">Seules les 500 dernières lignes sont conservées, et l'affichage ne défile plus tout seul si on remonte dans les logs. Pour revoir les messages de démarrage, appuyer à nouveau sur <kbd>RST</kbd> puis relancer la lecture.</p>
+      </div>
+    </section>
+  </div>
 
   <details>
     <summary>Détails techniques de la connexion et de l'envoi</summary>
@@ -137,6 +212,23 @@ function flushLogs() {
   const atBottom = logs.scrollHeight - logs.scrollTop - logs.clientHeight < 40;
   logs.textContent = logLines.join("\n");
   if (atBottom) logs.scrollTop = logs.scrollHeight;
+  updateTiles();
+}
+const MEASURE = /Current:\s*(-?[\d.]+)\s*mA.*Bus Voltage:\s*(-?[\d.]+)\s*mV.*Capacity:\s*(-?[\d.]+)\s*mAh/;
+const fmt = (n, digits) => n.toLocaleString("fr-FR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+function updateTiles() {
+  // The last line may be incomplete, so look a few lines back for a full measurement
+  for (let i = logLines.length - 1; i >= Math.max(0, logLines.length - 5); i--) {
+    const m = MEASURE.exec(logLines[i]);
+    if (!m) continue;
+    const mA = parseFloat(m[1]), mV = parseFloat(m[2]), mAh = parseFloat(m[3]);
+    const inAmps = Math.abs(mA) >= 1000;
+    $("vCur").textContent = inAmps ? fmt(mA / 1000, 2) : fmt(mA, 1);
+    $("uCur").textContent = inAmps ? "A" : "mA";
+    $("vVolt").textContent = fmt(mV / 1000, 2);
+    $("vCap").textContent = fmt(mAh, mAh >= 100 ? 0 : 2);
+    return;
+  }
 }
 function pushLog(text) {
   logPending += text;
@@ -256,6 +348,7 @@ async function stopLogs() {
   logPort = null;
   $("btnLogs").disabled = !("serial" in navigator);
   $("btnStopLogs").disabled = true;
+  $("console").classList.remove("live");
 }
 
 $("btnLogs").addEventListener("click", async () => {
@@ -278,6 +371,7 @@ $("btnLogs").addEventListener("click", async () => {
   logsRunning = true;
   $("btnLogs").disabled = true;
   $("btnStopLogs").disabled = false;
+  $("console").classList.add("live");
   setStatus("st3", "info", "Lecture en cours. Si rien ne s'affiche après quelques secondes, la carte est peut-être encore en mode programmation : appuyer sur RST et relancer.");
   const decoder = new TextDecoder();
   let received = false;
