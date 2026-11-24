@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installer le capteur de capacité</title>
+<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
+<style>
+  :root { --bg: #f6f7f9; --card: #fff; --text: #1a1c1f; --muted: #5b626b; --line: #d9dde2; --accent: #0b63ce; --hl: #fff6c7; --hl-line: #e0a800; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #15171a; --card: #1f2226; --text: #eceef0; --muted: #a3abb5; --line: #353a41; --accent: #6aa9ff; --hl: #3a3312; --hl-line: #b88a00; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 10px; }
+  ol { padding-left: 22px; margin: 0; }
+  li { margin: 6px 0; }
+  .steps { background: var(--hl); border: 2px solid var(--hl-line); border-radius: 8px; padding: 14px 18px; }
+  .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+  .card h3 { margin: 0; font-size: 1.05rem; }
+  .card p { margin: 0 0 8px; color: var(--muted); font-size: .92rem; flex: 1; }
+  button[slot="activate"] { width: 100%; padding: 10px 12px; font: inherit; font-weight: 600; color: #fff; background: #0b63ce; border: 0; border-radius: 6px; cursor: pointer; }
+  button[slot="activate"]:hover { background: #094fa5; }
+  .bad { color: #c0392b; font-size: .9rem; font-weight: 600; }
+  .note { color: var(--muted); font-size: .92rem; }
+  kbd { font: inherit; font-weight: 700; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; background: var(--card); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Installer le capteur de capacité</h1>
+  <p class="sub">LOLIN S2 Mini (ESP32-S2) &middot; Chrome ou Edge sur ordinateur, Windows ou macOS</p>
+
+  <div class="steps">
+    <ol>
+      <li>Brancher la carte au PC avec un câble USB (câble de données).</li>
+      <li>Passer la carte en mode boot : maintenir <kbd>0</kbd>, appuyer brièvement sur <kbd>RST</kbd>, relâcher <kbd>0</kbd>.</li>
+      <li>Cliquer ci-dessous sur le bouton <b>Installer</b> qui correspond à votre radio.</li>
+      <li>Choisir le port de la carte dans la liste (nom contenant « ESP32-S2 », ou un port COM sous Windows), puis suivre les écrans.</li>
+      <li>Une fois l'installation terminée, appuyer sur <kbd>RST</kbd> pour démarrer.</li>
+    </ol>
+  </div>
+
+  <h2>Choisir la version</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>FlySky</h3>
+      <p>Télémétrie iBus, courant sans correction.</p>
+      <esp-web-install-button manifest="manifest_Flysky100.json">
+        <button slot="activate">Installer FlySky</button>
+        <span slot="unsupported" class="bad">Navigateur non compatible : utiliser Chrome ou Edge.</span>
+        <span slot="not-allowed" class="bad">La page doit être ouverte en HTTPS.</span>
+      </esp-web-install-button>
+    </div>
+    <div class="card">
+      <h3>Futaba / FrSky</h3>
+      <p>Télémétrie SBUS2, courant sans correction.</p>
+      <esp-web-install-button manifest="manifest_Futaba100.json">
+        <button slot="activate">Installer Futaba 100 %</button>
+        <span slot="unsupported" class="bad">Navigateur non compatible : utiliser Chrome ou Edge.</span>
+        <span slot="not-allowed" class="bad">La page doit être ouverte en HTTPS.</span>
+      </esp-web-install-button>
+    </div>
+    <div class="card">
+      <h3>Futaba / FrSky &times;1,18</h3>
+      <p>Télémétrie SBUS2, courant corrigé &times;1,18.</p>
+      <esp-web-install-button manifest="manifest_Futaba118.json">
+        <button slot="activate">Installer Futaba 118 %</button>
+        <span slot="unsupported" class="bad">Navigateur non compatible : utiliser Chrome ou Edge.</span>
+        <span slot="not-allowed" class="bad">La page doit être ouverte en HTTPS.</span>
+      </esp-web-install-button>
+    </div>
+  </div>
+  <p class="note">Entre les deux versions Futaba : commencer par 100 %, passer à 118 % si le courant affiché est environ 18 % trop faible par rapport à une mesure de référence.</p>
+
+  <h2>En cas de problème</h2>
+  <ul class="note">
+    <li><b>Aucun port dans la liste :</b> refaire le passage en mode boot, changer de câble USB, essayer un autre port USB sans hub.</li>
+    <li><b>Erreur pendant l'installation :</b> débrancher, rebrancher, recharger la page et recommencer depuis l'étape 2. Fermer tout logiciel qui utilise le port (Arduino IDE, moniteur série).</li>
+    <li><b>La carte ne démarre pas :</b> recommencer l'installation en acceptant l'effacement complet quand il est proposé.</li>
+  </ul>
+</main>
+</body>
+</html>

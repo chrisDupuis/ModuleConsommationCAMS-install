@@ -1,0 +1,12 @@
+{
+  "name": "Capteur de capacité - Futaba/FrSky (SBUS2) x1,18",
+  "version": "2026-11-24",
+  "new_install_prompt_erase": true,
+  "new_install_improv_wait_time": 0,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S2",
+      "parts": [{ "path": "CapacitySensor_Futaba118.bin", "offset": 0 }]
+    }
+  ]
+}
