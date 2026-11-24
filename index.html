@@ -4,30 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Installer le capteur de capacité</title>
-<script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module"></script>
 <style>
-  :root { --bg: #f6f7f9; --card: #fff; --text: #1a1c1f; --muted: #5b626b; --line: #d9dde2; --accent: #0b63ce; --hl: #fff6c7; --hl-line: #e0a800; }
+  :root { --bg: #f6f7f9; --card: #fff; --text: #1a1c1f; --muted: #5b626b; --line: #d9dde2; --accent: #0b63ce; --ok: #1c7a34; --bad: #c0392b; --okbg: #e6f5ea; --badbg: #fdecea; --term: #111417; --termtext: #d7e0d7; }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #15171a; --card: #1f2226; --text: #eceef0; --muted: #a3abb5; --line: #353a41; --accent: #6aa9ff; --hl: #3a3312; --hl-line: #b88a00; }
+    :root { --bg: #15171a; --card: #1f2226; --text: #eceef0; --muted: #a3abb5; --line: #353a41; --accent: #6aa9ff; --ok: #6fd088; --bad: #ff8a7a; --okbg: #17301e; --badbg: #3a1b17; --term: #0b0d0f; }
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
   main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
   h1 { font-size: 1.6rem; margin: 0 0 4px; }
-  .sub { color: var(--muted); margin: 0 0 24px; }
-  h2 { font-size: 1.1rem; margin: 28px 0 10px; }
-  ol { padding-left: 22px; margin: 0; }
-  li { margin: 6px 0; }
-  .steps { background: var(--hl); border: 2px solid var(--hl-line); border-radius: 8px; padding: 14px 18px; }
-  .cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
-  .card h3 { margin: 0; font-size: 1.05rem; }
-  .card p { margin: 0 0 8px; color: var(--muted); font-size: .92rem; flex: 1; }
-  button[slot="activate"] { width: 100%; padding: 10px 12px; font: inherit; font-weight: 600; color: #fff; background: #0b63ce; border: 0; border-radius: 6px; cursor: pointer; }
-  button[slot="activate"]:hover { background: #094fa5; }
-  .bad { color: #c0392b; font-size: .9rem; font-weight: 600; }
-  .note { color: var(--muted); font-size: .92rem; }
-  kbd { font: inherit; font-weight: 700; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; background: var(--card); }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+  .step.locked { opacity: .55; }
+  .step h2 { font-size: 1.15rem; margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+  .num { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: .95rem; display: inline-flex; align-items: center; justify-content: center; }
+  .step.done .num { background: var(--ok); }
+  ol, ul { margin: 6px 0 12px; padding-left: 22px; }
+  li { margin: 3px 0; }
+  kbd { font: inherit; font-weight: 700; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; background: var(--bg); }
+  button { padding: 10px 16px; font: inherit; font-weight: 600; color: #fff; background: #0b63ce; border: 0; border-radius: 6px; cursor: pointer; }
+  button:hover:not(:disabled) { background: #094fa5; }
+  button:disabled { background: #8a929c; cursor: not-allowed; }
+  button.second { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  button.second:hover:not(:disabled) { background: var(--bg); }
+  button.second:disabled { opacity: .45; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .status { margin-top: 12px; padding: 9px 12px; border-radius: 6px; font-weight: 600; display: none; }
+  .status.ok { display: block; background: var(--okbg); color: var(--ok); }
+  .status.bad { display: block; background: var(--badbg); color: var(--bad); }
+  .status.info { display: block; background: var(--bg); color: var(--muted); }
+  .choices { display: grid; gap: 8px; margin: 8px 0 12px; }
+  .choices label { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; cursor: pointer; }
+  .choices input { margin-top: 5px; }
+  .choices small { display: block; color: var(--muted); }
+  .opt { display: block; color: var(--muted); font-size: .92rem; margin-bottom: 12px; }
+  progress { width: 100%; height: 14px; margin-top: 12px; display: none; }
+  pre { background: var(--term); color: var(--termtext); font: 12.5px/1.45 Menlo, Consolas, monospace; padding: 10px 12px; border-radius: 6px; margin: 12px 0 0; height: 260px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  details { margin-top: 12px; color: var(--muted); font-size: .92rem; }
+  details pre { height: 180px; }
+  .note { color: var(--muted); font-size: .92rem; margin: 8px 0 0; }
+  #unsupported { display: none; }
 </style>
 </head>
 <body>
@@ -35,54 +51,234 @@
   <h1>Installer le capteur de capacité</h1>
   <p class="sub">LOLIN S2 Mini (ESP32-S2) &middot; Chrome ou Edge sur ordinateur, Windows ou macOS</p>
 
-  <div class="steps">
+  <div id="unsupported" class="status bad">Ce navigateur ne permet pas d'accéder au port USB. Ouvrir cette page avec Chrome ou Edge sur un ordinateur.</div>
+
+  <section class="step" id="s1">
+    <h2><span class="num">1</span>Mode programmation et choix du port</h2>
     <ol>
       <li>Brancher la carte au PC avec un câble USB (câble de données).</li>
-      <li>Passer la carte en mode boot : maintenir <kbd>0</kbd>, appuyer brièvement sur <kbd>RST</kbd>, relâcher <kbd>0</kbd>.</li>
-      <li>Cliquer ci-dessous sur le bouton <b>Installer</b> qui correspond à votre radio.</li>
-      <li>Choisir le port de la carte dans la liste (nom contenant « ESP32-S2 », ou un port COM sous Windows), puis suivre les écrans.</li>
-      <li>Une fois l'installation terminée, appuyer sur <kbd>RST</kbd> pour démarrer.</li>
+      <li>Passer en mode programmation : maintenir <kbd>0</kbd>, appuyer brièvement sur <kbd>RST</kbd>, relâcher <kbd>0</kbd>.</li>
+      <li>Cliquer sur le bouton ci-dessous et choisir le port de la carte (nom contenant « ESP32-S2 », ou un port COM sous Windows).</li>
     </ol>
-  </div>
+    <div class="row">
+      <button id="btnConnect">Choisir le port et vérifier</button>
+      <button id="btnDisconnect" class="second" disabled>Déconnecter</button>
+    </div>
+    <div id="st1" class="status"></div>
+  </section>
 
-  <h2>Choisir la version</h2>
-  <div class="cards">
-    <div class="card">
-      <h3>FlySky</h3>
-      <p>Télémétrie iBus, courant sans correction.</p>
-      <esp-web-install-button manifest="manifest_Flysky100.json">
-        <button slot="activate">Installer FlySky</button>
-        <span slot="unsupported" class="bad">Navigateur non compatible : utiliser Chrome ou Edge.</span>
-        <span slot="not-allowed" class="bad">La page doit être ouverte en HTTPS.</span>
-      </esp-web-install-button>
+  <section class="step locked" id="s2">
+    <h2><span class="num">2</span>Envoi du programme</h2>
+    <div class="choices">
+      <label><input type="radio" name="fw" value="CapacitySensor_Flysky100.bin"><span><b>FlySky</b><small>Télémétrie iBus, courant sans correction</small></span></label>
+      <label><input type="radio" name="fw" value="CapacitySensor_Futaba100.bin"><span><b>Futaba / FrSky 100 %</b><small>Télémétrie SBUS2, courant sans correction</small></span></label>
+      <label><input type="radio" name="fw" value="CapacitySensor_Futaba118.bin"><span><b>Futaba / FrSky 118 %</b><small>Télémétrie SBUS2, courant corrigé &times;1,18</small></span></label>
     </div>
-    <div class="card">
-      <h3>Futaba / FrSky</h3>
-      <p>Télémétrie SBUS2, courant sans correction.</p>
-      <esp-web-install-button manifest="manifest_Futaba100.json">
-        <button slot="activate">Installer Futaba 100 %</button>
-        <span slot="unsupported" class="bad">Navigateur non compatible : utiliser Chrome ou Edge.</span>
-        <span slot="not-allowed" class="bad">La page doit être ouverte en HTTPS.</span>
-      </esp-web-install-button>
-    </div>
-    <div class="card">
-      <h3>Futaba / FrSky &times;1,18</h3>
-      <p>Télémétrie SBUS2, courant corrigé &times;1,18.</p>
-      <esp-web-install-button manifest="manifest_Futaba118.json">
-        <button slot="activate">Installer Futaba 118 %</button>
-        <span slot="unsupported" class="bad">Navigateur non compatible : utiliser Chrome ou Edge.</span>
-        <span slot="not-allowed" class="bad">La page doit être ouverte en HTTPS.</span>
-      </esp-web-install-button>
-    </div>
-  </div>
-  <p class="note">Entre les deux versions Futaba : commencer par 100 %, passer à 118 % si le courant affiché est environ 18 % trop faible par rapport à une mesure de référence.</p>
+    <label class="opt"><input type="checkbox" id="eraseAll"> Effacer toute la mémoire avant l'envoi (à cocher seulement si la carte ne démarre pas après une première installation)</label>
+    <button id="btnFlash" disabled>Envoyer le programme</button>
+    <progress id="prog" max="100" value="0"></progress>
+    <div id="st2" class="status"></div>
+  </section>
 
-  <h2>En cas de problème</h2>
-  <ul class="note">
-    <li><b>Aucun port dans la liste :</b> refaire le passage en mode boot, changer de câble USB, essayer un autre port USB sans hub.</li>
-    <li><b>Erreur pendant l'installation :</b> débrancher, rebrancher, recharger la page et recommencer depuis l'étape 2. Fermer tout logiciel qui utilise le port (Arduino IDE, moniteur série).</li>
-    <li><b>La carte ne démarre pas :</b> recommencer l'installation en acceptant l'effacement complet quand il est proposé.</li>
-  </ul>
+  <section class="step" id="s3">
+    <h2><span class="num">3</span>Redémarrage et lecture des logs</h2>
+    <ol>
+      <li>Appuyer sur <kbd>RST</kbd> pour redémarrer la carte en mode normal.</li>
+      <li>Attendre 3 secondes, cliquer sur le bouton ci-dessous et choisir le port de la carte. Ce n'est pas le même port qu'à l'étape 1 : la carte change de port en quittant le mode programmation.</li>
+    </ol>
+    <div class="row">
+      <button id="btnLogs">Lire les logs</button>
+      <button id="btnStopLogs" class="second" disabled>Arrêter</button>
+      <button id="btnClearLogs" class="second">Effacer</button>
+    </div>
+    <div id="st3" class="status"></div>
+    <pre id="logs" aria-label="Logs de la carte"></pre>
+    <p class="note">En fonctionnement normal, la carte affiche en continu le courant, la tension et la capacité mesurés. Pour revoir les messages de démarrage, appuyer à nouveau sur <kbd>RST</kbd> puis relancer la lecture.</p>
+  </section>
+
+  <details>
+    <summary>Détails techniques de la connexion et de l'envoi</summary>
+    <pre id="term"></pre>
+  </details>
 </main>
+
+<script type="module">
+import { ESPLoader, Transport } from "https://unpkg.com/esptool-js@0.7.1/bundle.js";
+
+const EXPECTED_CHIP = "ESP32-S2";
+const $ = (id) => document.getElementById(id);
+const term = $("term"), logs = $("logs");
+
+let transport = null, loader = null;
+let logPort = null, logReader = null, logsRunning = false;
+
+function setStatus(id, kind, text) {
+  const el = $(id);
+  el.className = "status" + (kind ? " " + kind : "");
+  el.textContent = text;
+}
+function append(el, text) {
+  el.textContent += text;
+  if (el.textContent.length > 200000) el.textContent = el.textContent.slice(-150000);
+  el.scrollTop = el.scrollHeight;
+}
+const terminal = {
+  clean() { term.textContent = ""; },
+  writeLine(data) { append(term, data + "\n"); },
+  write(data) { append(term, data); },
+};
+
+function updateFlashButton() {
+  $("btnFlash").disabled = !loader || !document.querySelector('input[name="fw"]:checked');
+}
+function setConnected(on) {
+  $("btnConnect").disabled = on;
+  $("btnDisconnect").disabled = !on;
+  $("s2").classList.toggle("locked", !on);
+  $("s1").classList.toggle("done", on);
+  updateFlashButton();
+}
+async function disconnectLoader() {
+  try { if (transport) await transport.disconnect(); } catch (e) { /* port already gone */ }
+  transport = null;
+  loader = null;
+  setConnected(false);
+}
+
+if (!("serial" in navigator)) {
+  $("unsupported").style.display = "block";
+  for (const b of document.querySelectorAll("button")) b.disabled = true;
+}
+
+document.querySelectorAll('input[name="fw"]').forEach((r) => r.addEventListener("change", updateFlashButton));
+
+$("btnConnect").addEventListener("click", async () => {
+  await stopLogs();
+  let port;
+  try {
+    port = await navigator.serial.requestPort();
+  } catch (e) {
+    setStatus("st1", "info", "Aucun port choisi.");
+    return;
+  }
+  setStatus("st1", "info", "Connexion en cours...");
+  $("btnConnect").disabled = true;
+  try {
+    transport = new Transport(port, false);
+    loader = new ESPLoader({ transport, baudrate: 115200, terminal });
+    const description = await loader.main();
+    const chipName = loader.chip && loader.chip.CHIP_NAME;
+    if (chipName !== EXPECTED_CHIP) {
+      await disconnectLoader();
+      setStatus("st1", "bad", `Carte détectée : ${chipName || description}. Ce n'est pas un ${EXPECTED_CHIP}, l'envoi est bloqué.`);
+      return;
+    }
+    setConnected(true);
+    setStatus("st1", "ok", `Connexion validée : ${description}. Passer à l'étape 2.`);
+  } catch (e) {
+    append(term, "Erreur : " + (e && e.message ? e.message : e) + "\n");
+    await disconnectLoader();
+    setStatus("st1", "bad", "La carte ne répond pas sur ce port. Refaire le passage en mode programmation (0 + RST), puis réessayer en vérifiant le port choisi.");
+  }
+});
+
+$("btnDisconnect").addEventListener("click", async () => {
+  await disconnectLoader();
+  setStatus("st1", "info", "Déconnecté.");
+});
+
+$("btnFlash").addEventListener("click", async () => {
+  const choice = document.querySelector('input[name="fw"]:checked');
+  if (!loader || !choice) return;
+  const prog = $("prog");
+  $("btnFlash").disabled = true;
+  $("btnDisconnect").disabled = true;
+  prog.style.display = "block";
+  prog.value = 0;
+  try {
+    setStatus("st2", "info", "Téléchargement du programme...");
+    const response = await fetch(choice.value, { cache: "no-store" });
+    if (!response.ok) throw new Error("fichier introuvable (" + response.status + ")");
+    const data = new Uint8Array(await response.arrayBuffer());
+    setStatus("st2", "info", "Envoi en cours, ne pas débrancher...");
+    await loader.writeFlash({
+      fileArray: [{ data, address: 0 }],
+      flashMode: "keep",
+      flashFreq: "keep",
+      flashSize: "keep",
+      eraseAll: $("eraseAll").checked,
+      compress: true,
+      reportProgress: (index, written, total) => { prog.value = Math.round((written / total) * 100); },
+    });
+    prog.value = 100;
+    try { await loader.after("hard_reset"); } catch (e) { /* manual reset needed on this board */ }
+    await disconnectLoader();
+    $("s2").classList.add("done");
+    setStatus("st2", "ok", "Programme envoyé. Passer à l'étape 3 : appuyer sur RST.");
+    setStatus("st1", "info", "Déconnecté après l'envoi.");
+  } catch (e) {
+    append(term, "Erreur : " + (e && e.message ? e.message : e) + "\n");
+    await disconnectLoader();
+    setStatus("st2", "bad", "L'envoi a échoué : " + (e && e.message ? e.message : e) + ". Reprendre à l'étape 1.");
+  }
+});
+
+async function stopLogs() {
+  logsRunning = false;
+  try { if (logReader) await logReader.cancel(); } catch (e) { /* reader already released */ }
+  try { if (logPort) await logPort.close(); } catch (e) { /* port already closed */ }
+  logReader = null;
+  logPort = null;
+  $("btnLogs").disabled = !("serial" in navigator);
+  $("btnStopLogs").disabled = true;
+}
+
+$("btnLogs").addEventListener("click", async () => {
+  if (loader) await disconnectLoader();
+  let port;
+  try {
+    port = await navigator.serial.requestPort();
+  } catch (e) {
+    setStatus("st3", "info", "Aucun port choisi.");
+    return;
+  }
+  try {
+    await port.open({ baudRate: 115200 });
+    await port.setSignals({ dataTerminalReady: true, requestToSend: false });
+  } catch (e) {
+    setStatus("st3", "bad", "Impossible d'ouvrir ce port. Vérifier que la carte a bien redémarré (RST) et qu'aucun autre logiciel n'utilise le port.");
+    return;
+  }
+  logPort = port;
+  logsRunning = true;
+  $("btnLogs").disabled = true;
+  $("btnStopLogs").disabled = false;
+  setStatus("st3", "info", "Lecture en cours. Si rien ne s'affiche après quelques secondes, la carte est peut-être encore en mode programmation : appuyer sur RST et relancer.");
+  const decoder = new TextDecoder();
+  let received = false;
+  try {
+    logReader = port.readable.getReader();
+    while (logsRunning) {
+      const { value, done } = await logReader.read();
+      if (done) break;
+      if (value && value.length) {
+        if (!received) { received = true; setStatus("st3", "ok", "La carte envoie des données : le programme fonctionne."); }
+        append(logs, decoder.decode(value, { stream: true }));
+      }
+    }
+  } catch (e) {
+    if (logsRunning) setStatus("st3", "bad", "Lecture interrompue : la carte a été débranchée ou redémarrée. Relancer la lecture.");
+  }
+  try { if (logReader) logReader.releaseLock(); } catch (e) { /* already released */ }
+  logReader = null;
+  await stopLogs();
+});
+
+$("btnStopLogs").addEventListener("click", async () => {
+  await stopLogs();
+  setStatus("st3", "info", "Lecture arrêtée.");
+});
+$("btnClearLogs").addEventListener("click", () => { logs.textContent = ""; });
+</script>
 </body>
 </html>
