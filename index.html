@@ -42,6 +42,7 @@
   pre { background: var(--term); color: var(--termtext); font: 12.5px/1.45 Menlo, Consolas, monospace; padding: 10px 12px; border-radius: 6px; margin: 12px 0 0; height: 260px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
   details { margin-top: 12px; color: var(--muted); font-size: .92rem; }
   details pre { height: 180px; }
+  #logs { position: relative; left: 50%; transform: translateX(-50%); width: min(1280px, calc(100vw - 32px)); height: 420px; white-space: pre; word-break: normal; }
   .note { color: var(--muted); font-size: .92rem; margin: 8px 0 0; }
   #unsupported { display: none; }
 </style>
@@ -93,7 +94,7 @@
     </div>
     <div id="st3" class="status"></div>
     <pre id="logs" aria-label="Logs de la carte"></pre>
-    <p class="note">En fonctionnement normal, la carte affiche en continu le courant, la tension et la capacité mesurés. Pour revoir les messages de démarrage, appuyer à nouveau sur <kbd>RST</kbd> puis relancer la lecture.</p>
+    <p class="note">En fonctionnement normal, la carte affiche en continu le courant, la tension et la capacité mesurés. Seules les 500 dernières lignes sont conservées, et l'affichage ne défile plus tout seul si on remonte dans les logs. Pour revoir les messages de démarrage, appuyer à nouveau sur <kbd>RST</kbd> puis relancer la lecture.</p>
   </section>
 
   <details>
@@ -121,6 +122,30 @@ function append(el, text) {
   el.textContent += text;
   if (el.textContent.length > 200000) el.textContent = el.textContent.slice(-150000);
   el.scrollTop = el.scrollHeight;
+}
+// Serial logs arrive hundreds of times per second: buffer them and repaint at most 5 times per second
+const MAX_LOG_LINES = 500;
+let logLines = [""], logPending = "", logTimer = null;
+function flushLogs() {
+  logTimer = null;
+  if (!logPending) return;
+  const parts = logPending.replace(/\r/g, "").split("\n");
+  logPending = "";
+  logLines[logLines.length - 1] += parts[0];
+  for (let i = 1; i < parts.length; i++) logLines.push(parts[i]);
+  if (logLines.length > MAX_LOG_LINES) logLines = logLines.slice(-MAX_LOG_LINES);
+  const atBottom = logs.scrollHeight - logs.scrollTop - logs.clientHeight < 40;
+  logs.textContent = logLines.join("\n");
+  if (atBottom) logs.scrollTop = logs.scrollHeight;
+}
+function pushLog(text) {
+  logPending += text;
+  if (!logTimer) logTimer = setTimeout(flushLogs, 200);
+}
+function clearLogs() {
+  logLines = [""];
+  logPending = "";
+  logs.textContent = "";
 }
 const terminal = {
   clean() { term.textContent = ""; },
@@ -263,7 +288,7 @@ $("btnLogs").addEventListener("click", async () => {
       if (done) break;
       if (value && value.length) {
         if (!received) { received = true; setStatus("st3", "ok", "La carte envoie des données : le programme fonctionne."); }
-        append(logs, decoder.decode(value, { stream: true }));
+        pushLog(decoder.decode(value, { stream: true }));
       }
     }
   } catch (e) {
@@ -278,7 +303,7 @@ $("btnStopLogs").addEventListener("click", async () => {
   await stopLogs();
   setStatus("st3", "info", "Lecture arrêtée.");
 });
-$("btnClearLogs").addEventListener("click", () => { logs.textContent = ""; });
+$("btnClearLogs").addEventListener("click", clearLogs);
 </script>
 </body>
 </html>
